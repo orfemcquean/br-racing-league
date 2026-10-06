@@ -596,4 +596,45 @@ window.BR_PLAYERS = [{"registration_number": "0000", "name": "かずぼーーー
 })();
 </script>
 
+
+<script id="br-real-player-detail-override">
+(function(){
+  const stats = window.BR_PLAYER_STATS || {};
+  const original = window.BR_PLAYERS || [];
+
+  function esc(s){return String(s ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function getNo(){const m=location.hash.match(/^#\/players\/([^/?#]+)/);return m?decodeURIComponent(m[1]):null;}
+
+  function render(){
+    const no=getNo();
+    if(!no) return;
+    const p=original.find(x=>String(x.registration_number)===String(no));
+    if(!p) return;
+    const s=stats[String(no)]||{runs:0,wins:0,second:0,third:0,fourth:0,fifth:0,sixth:0,win_rate:null,recent:[]};
+    const d=document.getElementById('br-player-detail');
+    if(!d) return;
+    const rate=s.win_rate===null?'—':(s.win_rate*100).toFixed(1)+'%';
+    d.querySelectorAll('.stat-value').forEach((el,i)=>{
+      const vals=[s.runs,s.wins,rate,'—','—','—'];
+      if(i<vals.length) el.textContent=vals[i];
+    });
+    const panels=d.querySelectorAll('.detail-panel');
+    if(panels[0]) panels[0].querySelector('.empty-detail').innerHTML =
+      s.runs ? `DBに登録されているレース結果から集計：<strong>${s.runs}走</strong>・1着 <strong>${s.wins}回</strong>・2着 ${s.second}回・3着 ${s.third}回` :
+      '現在、この選手のレース結果はDBに登録されていません。';
+    if(panels[1]) panels[1].querySelector('.empty-detail').textContent='優勝履歴は、節の優勝戦結果を基に集計する処理を追加予定です。';
+    if(panels[2]) panels[2].querySelector('.empty-detail').textContent='SG・G1選出履歴は、出走表・節情報との連携後に自動表示します。';
+    if(panels[3]){
+      const rows=s.recent||[];
+      panels[3].querySelector('.empty-detail').innerHTML=rows.length
+        ? rows.map(r=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e7eef4"><span>${esc(r.date)}</span><strong>${r.rank?esc(r.rank)+'着':'—'}</strong></div>`).join('')
+        : '現在、この選手のレース結果はDBに登録されていません。';
+    }
+  }
+  window.addEventListener('hashchange',()=>setTimeout(render,30));
+  setTimeout(render,100);
+  setTimeout(render,600);
+})();
+</script>
+
 </body></html>
