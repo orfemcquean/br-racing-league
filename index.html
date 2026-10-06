@@ -319,7 +319,11 @@ const ps=[
 ["4168","サンプル選手D","B2","大分支部","無所属","5.54","142","11","¥381,000"]];
 const $=s=>document.querySelector(s);
 function nav(p){location.hash=p;render(p)}
-function openPlayer(id){location.hash="player-"+id;render("player",id)}
+function openPlayer(id){
+  const pid=String(id);
+  location.hash="player-"+encodeURIComponent(pid);
+  render("player",pid);
+}
 function pc(p){return `<div class="card" onclick="openPlayer('${p[0]}')"><div class="player"><div class="avatar">${p[0].slice(-2)}</div><div><b>${p[1]}</b><br><span class="grade">${p[2]}</span> <span class="badge">${p[3]}</span></div></div><p class="label">派閥：${p[4]}</p><b>勝率 ${p[5]}</b></div>`}
 function home(){return `<section class="hero"><div class="ey">OFFICIAL DATA PORTAL</div><h1>BR Racing League<br>選手名鑑</h1><p>選手・大会・シーズン・支部・派閥・歴代記録をひとつに。将来は公式DBと連携して自動更新します。</p><div class="search"><input id="q" placeholder="選手名・登録番号"><button onclick="search()">検索</button></div></section>
 <div class="grid"><div class="card"><div class="label">登録選手</div><div class="num">—</div></div><div class="card"><div class="label">現行シーズン</div><div class="num">第6</div></div><div class="card"><div class="label">グレード</div><div class="num">SG〜一般</div></div><div class="card"><div class="label">DB</div><div class="num">準備中</div></div></div>
@@ -334,10 +338,53 @@ function races(){return `<section class="hero"><div class="ey">RACES</div><h1>�
 function seasons(){return `<section class="hero"><div class="ey">SEASONS</div><h1>シーズン</h1><p>SG開催を基準としたシーズン別データ。</p></section><div class="cards">${[1,2,3,4,5,6].map(n=>`<div class="card"><h3>第${n}シーズン</h3><p class="label">ランキング・大会履歴・選手成績</p><button class="primary">詳細を見る</button></div>`).join("")}</div>`}
 function records(){return `<section class="hero"><div class="ey">ALL-TIME RECORDS</div><h1>歴代記録</h1><p>BR Racing Leagueの歴史が蓄積されるページ。</p></section><div class="grid">${["歴代最高勝率","最多優勝","最多賞金","最多SG優勝"].map(x=>`<div class="card"><div class="label">${x}</div><div class="num">—</div><p class="label">DB蓄積後に確定</p></div>`).join("")}</div>`}
 function groups(){let bs=[...new Set(ps.map(p=>p[3]))],gs=[...new Set(ps.map(p=>p[4]))];return `<section class="hero"><div class="ey">BRANCHES & GROUPS</div><h1>支部・派閥</h1><p>公式所属の支部と、独自グループの派閥を完全に分離して管理。</p></section><h2>支部</h2><div class="cards">${bs.map(x=>`<div class="card"><h3>🏢 ${x}</h3><p>${ps.filter(p=>p[3]===x).length}名</p></div>`).join("")}</div><div class="section"><h2>派閥</h2><div class="cards">${gs.map(x=>`<div class="card"><h3>👥 ${x}</h3><p>${ps.filter(p=>p[4]===x).length}名</p></div>`).join("")}</div>`}
-function playerPage(id){let p=ps.find(x=>x[0]===id)||ps[0];return `<div class="heroPlayer"><div class="profile"><div class="big">${p[0].slice(-2)}</div><div><h1>${p[1]}</h1><p>登録番号 ${p[0]}　<span class="grade">${p[2]}</span></p><p>${p[3]}　｜　派閥：${p[4]}</p></div></div><div class="tabs"><button>プロフィール</button><button>通算成績</button><button>シーズン</button><button>優勝歴</button><button>SG/G1選出歴</button><button>レース履歴</button></div></div><div class="kpi"><div class="card"><small>通算勝率</small><strong>${p[5]}</strong></div><div class="card"><small>総走数</small><strong>${p[6]}</strong></div><div class="card"><small>優勝回数</small><strong>${p[7]}</strong></div><div class="card"><small>通算賞金</small><strong>${p[8]}</strong></div></div><div class="section cards"><div class="card"><h3>基本プロフィール</h3><p>登録番号：${p[0]}</p><p>級別：${p[2]}</p><p>支部：${p[3]}</p><p>派閥：${p[4]}</p></div><div class="card"><h3>SG・G1選出歴</h3><p class="label">DB蓄積後に自動表示</p></div><div class="card"><h3>シーズン成績</h3><p class="label">第6シーズン：集計準備中</p></div></div><div class="section notice">レース結果DB接続後、節・レース・着順などを自動表示します。</div>`}
+function playerPage(id){
+  const all=window.BR_PLAYERS||[];
+  const p=all.find(x=>String(x.registration_number)===String(id));
+  if(!p){
+    return `<section class="hero"><h1>選手が見つかりません</h1><p>登録番号：${id}</p><button class="primary" onclick="nav('players')">選手一覧へ戻る</button></section>`;
+  }
+  const grade=p.grade||"—";
+  const branch=p.branch||"—";
+  const faction=p.faction||"—";
+  return `<div class="heroPlayer">
+    <div class="profile">
+      <div class="big">${String(p.registration_number).slice(-2)}</div>
+      <div>
+        <h1>${p.name}</h1>
+        <p>登録番号 ${p.registration_number}　<span class="grade">${grade}</span></p>
+        <p>${branch}　｜　派閥：${faction}</p>
+      </div>
+    </div>
+    <div class="tabs">
+      <button>プロフィール</button><button>通算成績</button><button>シーズン</button>
+      <button>優勝歴</button><button>SG/G1選出歴</button><button>レース履歴</button>
+    </div>
+  </div>
+  <div class="kpi">
+    <div class="card"><small>通算勝率</small><strong>—</strong></div>
+    <div class="card"><small>総走数</small><strong>—</strong></div>
+    <div class="card"><small>優勝回数</small><strong>—</strong></div>
+    <div class="card"><small>通算賞金</small><strong>—</strong></div>
+  </div>
+  <div class="section">
+    <button class="back-btn" onclick="nav('players')">← 選手一覧へ戻る</button>
+  </div>
+  <div class="section cards">
+    <div class="card"><h3>基本プロフィール</h3>
+      <p>登録番号：${p.registration_number}</p>
+      <p>級別：${grade}</p>
+      <p>支部：${branch}</p>
+      <p>派閥：${faction}</p>
+    </div>
+    <div class="card"><h3>SG・G1選出歴</h3><p class="label">DB蓄積後に自動表示</p></div>
+    <div class="card"><h3>シーズン成績</h3><p class="label">集計準備中</p></div>
+  </div>
+  <div class="section notice">レース結果DB接続後、節・レース・着順などを自動表示します。</div>`;
+}
 function render(p,id){document.querySelectorAll(".menu button").forEach(b=>b.classList.toggle("active",b.dataset.p===p));$("#app").innerHTML=p==="home"?home():p==="players"?players():p==="rankings"?rankings():p==="races"?races():p==="seasons"?seasons():p==="records"?records():p==="groups"?groups():playerPage(id)}
 $("#menu").onclick=e=>{let b=e.target.closest("button");if(b)nav(b.dataset.p)}
-let h=location.hash.slice(1);h.startsWith("player-")?render("player",h.slice(7)):render(h||"home");
+let h=location.hash.slice(1);h.startsWith("player-")?render("player",decodeURIComponent(h.slice(7))):render(h||"home");
 </script>
 <script id="br-header-script">
 (function(){
@@ -411,7 +458,7 @@ window.BR_PLAYERS = [{"registration_number": "0000", "name": "かずぼーーー
 })();
 </script>
 
-<script id="br-player-detail-ui">
+<script id="br-player-detail-ui" style="display:none">
 (function(){
   const players = window.BR_PLAYERS || [];
 
