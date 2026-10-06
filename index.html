@@ -224,6 +224,12 @@ body{background:#f4f8fc!important}
 .player-data-note{margin:10px 0 14px;padding:10px 12px;border-radius:9px;background:#f5f9fd;border:1px solid #dbe8f2;color:#5d7185;font-size:12px}
 </style>
 
+
+<style id="br-player-stats-style">
+.result-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #e7eef4}
+.result-row:last-child{border-bottom:0}
+</style>
+
 </head>
 <body>
 <header class="site-header">
@@ -340,20 +346,38 @@ function records(){return `<section class="hero"><div class="ey">ALL-TIME RECORD
 function groups(){let bs=[...new Set(ps.map(p=>p[3]))],gs=[...new Set(ps.map(p=>p[4]))];return `<section class="hero"><div class="ey">BRANCHES & GROUPS</div><h1>支部・派閥</h1><p>公式所属の支部と、独自グループの派閥を完全に分離して管理。</p></section><h2>支部</h2><div class="cards">${bs.map(x=>`<div class="card"><h3>🏢 ${x}</h3><p>${ps.filter(p=>p[3]===x).length}名</p></div>`).join("")}</div><div class="section"><h2>派閥</h2><div class="cards">${gs.map(x=>`<div class="card"><h3>👥 ${x}</h3><p>${ps.filter(p=>p[4]===x).length}名</p></div>`).join("")}</div>`}
 function playerPage(id){
   const all=window.BR_PLAYERS||[];
-  const p=all.find(x=>String(x.registration_number)===String(id));
+  const reg=String(id||"");
+  const p=all.find(x=>String(x.registration_number)===reg);
   if(!p){
-    return `<section class="hero"><h1>選手が見つかりません</h1><p>登録番号：${id}</p><button class="primary" onclick="nav('players')">選手一覧へ戻る</button></section>`;
+    return `<section class="hero"><h1>選手が見つかりません</h1><p>登録番号：${reg}</p><button class="primary" onclick="nav('players')">選手一覧へ戻る</button></section>`;
   }
+
+  // DBの集計値は「登録番号」をキーとして埋め込んだスナップショットを使用。
+  const allStats=window.BR_PLAYER_STATS||{};
+  const s=allStats[reg]||{};
+  const runs=Number(s.runs||0);
+  const wins=Number(s.wins||0);
+  const winRate=(s.win_rate==null) ? "—" : (Number(s.win_rate)*100).toFixed(1)+"%";
+
   const grade=p.grade||"—";
   const branch=p.branch||"—";
   const faction=p.faction||"—";
+  const recent=s.recent||[];
+
+  const recentHtml=recent.length
+    ? recent.map(r=>`<div class="result-row">
+        <span>${r.date||"—"}${r.race_type?"・"+r.race_type:""}${r.race_number?" "+r.race_number+"R":""}</span>
+        <strong>${r.rank?r.rank+"着":"—"}</strong>
+      </div>`).join("")
+    : `<p class="label">この選手のレース結果は現在DBにありません。</p>`;
+
   return `<div class="heroPlayer">
     <div class="profile">
       <div class="big">${String(p.registration_number).slice(-2)}</div>
       <div>
         <h1>${p.name}</h1>
         <p>登録番号 ${p.registration_number}　<span class="grade">${grade}</span></p>
-        <p>${branch}　｜　派閥：${faction}</p>
+        <p>${branch}　｜　派閥：${faction||"—"}</p>
       </div>
     </div>
     <div class="tabs">
@@ -361,26 +385,48 @@ function playerPage(id){
       <button>優勝歴</button><button>SG/G1選出歴</button><button>レース履歴</button>
     </div>
   </div>
+
   <div class="kpi">
-    <div class="card"><small>通算勝率</small><strong>—</strong></div>
-    <div class="card"><small>総走数</small><strong>—</strong></div>
-    <div class="card"><small>優勝回数</small><strong>—</strong></div>
+    <div class="card"><small>通算勝率</small><strong>${winRate}</strong></div>
+    <div class="card"><small>総走数</small><strong>${runs||"—"}</strong></div>
+    <div class="card"><small>1着数</small><strong>${runs?wins:"—"}</strong></div>
     <div class="card"><small>通算賞金</small><strong>—</strong></div>
   </div>
+
   <div class="section">
     <button class="back-btn" onclick="nav('players')">← 選手一覧へ戻る</button>
   </div>
+
   <div class="section cards">
     <div class="card"><h3>基本プロフィール</h3>
       <p>登録番号：${p.registration_number}</p>
       <p>級別：${grade}</p>
       <p>支部：${branch}</p>
-      <p>派閥：${faction}</p>
+      <p>派閥：${faction||"—"}</p>
     </div>
-    <div class="card"><h3>SG・G1選出歴</h3><p class="label">DB蓄積後に自動表示</p></div>
-    <div class="card"><h3>シーズン成績</h3><p class="label">集計準備中</p></div>
+
+    <div class="card"><h3>通算成績</h3>
+      <p>通算：${runs||"—"}走</p>
+      <p>1着：${runs?wins:"—"}回</p>
+      <p>2着：${runs?(s.second||0):"—"}回</p>
+      <p>3着：${runs?(s.third||0):"—"}回</p>
+      <p>4着：${runs?(s.fourth||0):"—"}回</p>
+      <p>5着：${runs?(s.fifth||0):"—"}回</p>
+      <p>6着：${runs?(s.sixth||0):"—"}回</p>
+    </div>
+
+    <div class="card"><h3>SG・G1選出歴</h3><p class="label">出走表・節データ連携後に自動表示</p></div>
+    <div class="card"><h3>シーズン成績</h3><p class="label">シーズン集計処理を追加予定</p></div>
   </div>
-  <div class="section notice">レース結果DB接続後、節・レース・着順などを自動表示します。</div>`;
+
+  <div class="section">
+    <div class="card">
+      <h3>最近のレース</h3>
+      ${recentHtml}
+    </div>
+  </div>
+
+  <div class="section notice">現在の成績はDBから作成したスナップショットです。登録番号をキーとして選手を識別しています。</div>`;
 }
 function render(p,id){document.querySelectorAll(".menu button").forEach(b=>b.classList.toggle("active",b.dataset.p===p));$("#app").innerHTML=p==="home"?home():p==="players"?players():p==="rankings"?rankings():p==="races"?races():p==="seasons"?seasons():p==="records"?records():p==="groups"?groups():playerPage(id)}
 $("#menu").onclick=e=>{let b=e.target.closest("button");if(b)nav(b.dataset.p)}
