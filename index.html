@@ -177,7 +177,7 @@ function fillPlayers(){
 }
 function playerPage(reg){
  const p=P.find(x=>String(x.registration_number)===String(reg)); if(!p)return `<section class="hero"><h1>選手が見つかりません</h1><p>登録番号：${esc(reg)}</p></section>`;
- const s=stat(p.registration_number), rate=s.win_rate==null?"—":(s.win_rate*100).toFixed(2);
+ const s=stat(p.registration_number), rate=s.win_rate==null?"—":(s.win_rate).toFixed(2);
  return `<section class="player-head"><div class="player-number">${esc(String(p.registration_number).slice(-2))}</div><div><h1>${esc(p.name)}</h1><p>登録番号 ${esc(p.registration_number)}　<span class="grade">${esc(p.grade||"—")}</span></p><p>${esc(p.branch||"—")}　｜　派閥：${esc(p.faction||"—")}</p></div></section>
  <section class="kpi"><div class="card"><small>通算得点率</small><strong>${rate}</strong></div><div class="card"><small>総走数</small><strong>${s.runs||"—"}</strong></div><div class="card"><small>合計得点</small><strong>${s.runs?s.points:"—"}</strong></div><div class="card"><small>1着数</small><strong>${s.runs?s.wins:"—"}</strong></div></section>
  <section class="section"><button class="back-btn" onclick="nav('players')">← 選手一覧へ戻る</button></section>
@@ -187,7 +187,7 @@ function playerPage(reg){
  <section class="section"><div class="card"><h2>最近のレース</h2>${s.recent.length?s.recent.map(r=>`<div class="result-row"><span>${esc(r.date||"—")}${r.race_type?"・"+esc(r.race_type):""}${r.race_number?" "+esc(r.race_number)+"R":""}</span><b>${r.rank?esc(r.rank)+"着":"—"}</b></div>`).join(""):"<p class='muted'>レース結果なし</p>"}</div></section>`
 }
 function rankingsPage(){
- return `<section class="hero"><p class="eyebrow">RANKINGS</p><h1>ランキング</h1><p>現在の仮DBから算出した得点率ランキングです。</p></section><section class="section"><div class="card"><h2>得点率ランキング</h2>${DATA.ranking.slice(0,20).map((p,i)=>`<div class="result-row"><span><b>${i+1}位</b>　${esc(p.registration_number)} ${esc(p.name)}<small>${esc(p.branch||"—")}　${p.runs}走</small></span><b>${(p.win_rate*100).toFixed(2)}</b></div>`).join("")||"<p>集計対象なし</p>"}</div></section>`
+ return `<section class="hero"><p class="eyebrow">RANKINGS</p><h1>ランキング</h1><p>現在の仮DBから算出した得点率ランキングです。</p></section><section class="section"><div class="card"><h2>得点率ランキング</h2>${DATA.ranking.slice(0,20).map((p,i)=>`<div class="result-row"><span><b>${i+1}位</b>　${esc(p.registration_number)} ${esc(p.name)}<small>${esc(p.branch||"—")}　${p.runs}走</small></span><b>${(p.win_rate).toFixed(2)}</b></div>`).join("")||"<p>集計対象なし</p>"}</div></section>`
 }
 function placeholder(title){return `<section class="hero"><p class="eyebrow">BR RACING LEAGUE</p><h1>${title}</h1><p>このページは準備中です。</p></section>`}
 function render(){
