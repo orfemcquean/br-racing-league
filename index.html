@@ -325,11 +325,7 @@ const ps=[
 ["4168","サンプル選手D","B2","大分支部","無所属","5.54","142","11","¥381,000"]];
 const $=s=>document.querySelector(s);
 function nav(p){location.hash=p;render(p)}
-function openPlayer(id){
-  const pid=String(id);
-  location.hash="player-"+encodeURIComponent(pid);
-  render("player",pid);
-}
+function openPlayer(id){location.hash="player/"+encodeURIComponent(String(id));render();}
 function pc(p){return `<div class="card" onclick="openPlayer('${p[0]}')"><div class="player"><div class="avatar">${p[0].slice(-2)}</div><div><b>${p[1]}</b><br><span class="grade">${p[2]}</span> <span class="badge">${p[3]}</span></div></div><p class="label">派閥：${p[4]}</p><b>勝率 ${p[5]}</b></div>`}
 function home(){return `<section class="hero"><div class="ey">OFFICIAL DATA PORTAL</div><h1>BR Racing League<br>選手名鑑</h1><p>選手・大会・シーズン・支部・派閥・歴代記録をひとつに。将来は公式DBと連携して自動更新します。</p><div class="search"><input id="q" placeholder="選手名・登録番号"><button onclick="search()">検索</button></div></section>
 <div class="grid"><div class="card"><div class="label">登録選手</div><div class="num">—</div></div><div class="card"><div class="label">現行シーズン</div><div class="num">第6</div></div><div class="card"><div class="label">グレード</div><div class="num">SG〜一般</div></div><div class="card"><div class="label">DB</div><div class="num">準備中</div></div></div>
@@ -755,7 +751,7 @@ let h=location.hash.slice(1);h.startsWith("player-")?render("player",decodeURICo
       <div class="tabs"><button>プロフィール</button><button>通算成績</button><button>シーズン</button><button>優勝歴</button><button>SG/G1選出歴</button><button>レース履歴</button></div>
     </div>
     <div class="kpi">
-      <div class="card"><small>通算勝率</small><strong>${rate}</strong></div>
+      <div class="card"><small>通算得点率</small><strong>${rate}</strong></div>
       <div class="card"><small>総走数</small><strong>${s.runs||"—"}</strong></div>
       <div class="card"><small>1着数</small><strong>${s.runs?s.wins:"—"}</strong></div>
       <div class="card"><small>通算賞金</small><strong>—</strong></div>
@@ -763,7 +759,7 @@ let h=location.hash.slice(1);h.startsWith("player-")?render("player",decodeURICo
     <div class="section"><button class="back-btn" onclick="nav('players')">← 選手一覧へ戻る</button></div>
     <div class="section cards">
       <div class="card"><h3>基本プロフィール</h3><p>登録番号：${esc(p.registration_number)}</p><p>級別：${esc(p.grade||"—")}</p><p>支部：${esc(p.branch||"—")}</p><p>派閥：${esc(p.faction||"—")}</p></div>
-      <div class="card"><h3>通算成績</h3><p>通算：${s.runs||"—"}走</p><p>1着：${s.runs?s.wins:"—"}回</p><p>2着：${s.runs?s.second:"—"}回</p><p>3着：${s.runs?s.third:"—"}回</p><p>4着：${s.runs?s.fourth:"—"}回</p><p>5着：${s.runs?s.fifth:"—"}回</p><p>6着：${s.runs?s.sixth:"—"}回</p></div>
+      <div class="card"><h3>通算成績</h3><p>通算：${s.runs||"—"}走</p><p>合計得点：${s.runs?s.points:"—"}点</p><p>通算得点率：${rate}</p><p>1着：${s.runs?s.wins:"—"}回</p><p>2着：${s.runs?s.second:"—"}回</p><p>3着：${s.runs?s.third:"—"}回</p><p>4着：${s.runs?s.fourth:"—"}回</p><p>5着：${s.runs?s.fifth:"—"}回</p><p>6着：${s.runs?s.sixth:"—"}回</p></div>
       <div class="card"><h3>シーズン成績</h3><p class="label">公式シーズン境界表を接続後に正式な第○シーズン表示へ変更します。</p></div>
       <div class="card"><h3>優勝・タイトル歴</h3><p class="label">優勝戦・タイトル判定を接続予定</p></div>
     </div>
