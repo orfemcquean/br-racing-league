@@ -169,7 +169,8 @@ async function loadWebData(){const res=await fetch("./web_data.json",{cache:"no-
 function toggleMenu(){document.getElementById("mainNav").classList.toggle("open")}
 function nav(path){location.hash="#/"+path}
 function stat(reg){return S[String(reg)]||{runs:0,points:0,wins:0,second:0,third:0,fourth:0,fifth:0,sixth:0,win_rate:null,prize_money:0,recent:[]}}
-function prizeText(v){return v==null?"—":`${Number(v).toLocaleString(undefined,{maximumFractionDigits:1})}万円`}\nfunction player(reg){return P.find(p=>String(p.registration_number)===String(reg))}
+function prizeText(v){return v==null?"—":`${Number(v).toLocaleString(undefined,{maximumFractionDigits:1})}万円`}
+function player(reg){return P.find(p=>String(p.registration_number)===String(reg))}
 function playerHistory(reg){return RACES.flatMap(r=>r.entries.filter(e=>String(e.registration_number||"")===String(reg)).map(e=>({race_id:r.id,date:r.date,event_name:r.event_name,grade:r.grade,race_number:r.race_number,lane:e.lane,finish:e.finish,status:e.status,points:e.points,prize_money:e.prize_money,has_result:r.has_result}))).sort((a,b)=>String(b.date).localeCompare(String(a.date))||(b.race_number||0)-(a.race_number||0))}
 function raceSort(a,b){return String(b.date).localeCompare(String(a.date))||(Number(b.section_id)||0)-(Number(a.section_id)||0)||(Number(b.race_number)||0)-(Number(a.race_number)||0)}
 function raceSummary(r){return `${esc(r.date||"")}　${esc(r.grade||"")}　${esc(r.event_name||"")}　${r.race_number?esc(r.race_number)+"R":""}`}
