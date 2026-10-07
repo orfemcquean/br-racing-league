@@ -212,18 +212,21 @@ return `<div style="margin-bottom:12px"><a class="back-btn" href="#/races">← �
 <section class="section"><div class="race-nav">${prev?`<a href="#/race/${encodeURIComponent(prev.id)}">← 前のレース</a>`:'<span></span>'}${next?`<a href="#/race/${encodeURIComponent(next.id)}">次のレース →</a>`:'<span></span>'}</div></section>
 <section class="section"><div class="card race-entry-card">
   <div class="sectionhead"><div><h2>出走表</h2><p class="muted">登録された号艇をそのまま表示しています。</p></div><span class="tag">6艇</span></div>
-  <div class="entry-table-wrap"><table class="entry-table"><thead><tr><th>艇</th><th>登録番号</th><th>選手名</th><th>支部</th><th>級別</th><th>${r.has_result?'着順':'状態'}</th><th>得点</th></tr></thead><tbody>
+  <div class="entry-table-wrap"><table class="entry-table"><thead><tr><th>艇</th><th>登録番号</th><th>選手名</th><th>支部</th><th>級別</th><th>勝率</th><th>2連対率</th><th>3連対率</th><th>${r.has_result?'着順':'状態'}</th><th>得点</th></tr></thead><tbody>
   ${rows.map(e=>`<tr class="${laneClass[e.lane]||''} ${e.finish===1?'entry-winner':''}">
     <td><span class="boat-no">${esc(e.lane)}</span></td>
     <td>${esc(e.registration_number||'—')}</td>
     <td class="entry-name">${e.registration_number?`<a class="player-link" href="#/player/${encodeURIComponent(e.registration_number)}">${esc(e.name)}</a>`:esc(e.name)}${!e.registration_number?'<small class="npc">NPC / 未登録</small>':''}</td>
     <td>${esc(e.branch||'—')}</td>
     <td>${e.grade?`<span class="entry-grade">${esc(e.grade)}</span>`:'—'}</td>
+    <td>${e.registration_number&&stat(e.registration_number).runs?Number(stat(e.registration_number).win_rate||0).toFixed(2):'—'}</td>
+    <td>${e.registration_number&&stat(e.registration_number).runs?percentageValue((stat(e.registration_number).wins||0)+(stat(e.registration_number).second||0),stat(e.registration_number).runs).toFixed(2)+'%':'—'}</td>
+    <td>${e.registration_number&&stat(e.registration_number).runs?percentageValue((stat(e.registration_number).wins||0)+(stat(e.registration_number).second||0)+(stat(e.registration_number).third||0),stat(e.registration_number).runs).toFixed(2)+'%':'—'}</td>
     <td>${e.status?`<span class="flying">${esc(e.status)}</span>`:(e.finish?`<b>${esc(e.finish)}着</b>`:'<span class="pending">—</span>')}</td>
     <td>${e.points!=null?esc(e.points):'—'}</td>
   </tr>`).join('')}
   </tbody></table></div>
-  <p class="entry-note">※号艇は出走表登録時の lane を正本として使用しています。</p>
+  <p class="entry-note">※勝率は本Webに収録された有効出走の得点率、2連対率・3連対率はそれぞれ1～2着・1～3着の割合です。号艇は出走表登録時の lane を正本として使用しています。</p>
 </div></section>
 <section class="section"><div class="card"><div class="sectionhead"><h2>${r.has_result?'レース結果':'結果'}</h2>${r.has_result?'<span class="tag">確定</span>':'<span class="status-pending">未登録</span>'}</div>
 ${r.has_result?`<div class="result-order">${r.entries.slice().sort((a,b)=>(a.finish??99)-(b.finish??99)||(a.lane-b.lane)).map(e=>`<div class="result-order-row ${e.finish===1?'result-first':''}"><span class="result-place">${e.finish?esc(e.finish):esc(e.status||'—')}</span><span class="result-boat">${esc(e.lane)}号艇</span><span class="result-player">${e.registration_number?`<a class="player-link" href="#/player/${encodeURIComponent(e.registration_number)}">${esc(e.name)}</a>`:esc(e.name)}</span><b>${e.points!=null?esc(e.points)+'点':'—'}</b></div>`).join('')}</div>`:'<p class="muted">結果報告がまだ登録されていません。現在は出走表のみ表示しています。</p>'}</div></section>`}
