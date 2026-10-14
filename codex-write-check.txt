@@ -1,0 +1,4 @@
+BR Racing League GitHub write verification
+Date: 2026-10-14
+Scope: isolated branch only
+No Sites, D1/R2, Bot, or Discord changes.
